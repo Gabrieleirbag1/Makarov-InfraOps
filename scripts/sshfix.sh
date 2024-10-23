@@ -32,5 +32,5 @@ EOF"
 # Redémarrer le service SSH pour appliquer les changements
 sudo systemctl restart ssh
 
-# Modifier le mot de passe de l'utilisateur "vagrant"
+# Modifier le mot de passe de l'utilisateur "vagrant" en "vagrant"
 echo "vagrant:vagrant" | sudo chpasswd
