@@ -1,0 +1,142 @@
+services:
+
+
+##### DATABASE #####
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: toto
+      MYSQL_DATABASE: makarov_airport
+      MYSQL_USER: gab
+      MYSQL_PASSWORD: toto
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.5
+####################
+
+###### API REST ########
+  web-rest-1:
+    build:
+      context: ./django-compose-user/makarov_users/
+      dockerfile: Dockerfile
+      target: builder
+    ports: 
+      - '8001:8000'
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.8
+    depends_on:
+      - db
+
+  web-rest-2:
+    build:
+      context: ./django-compose-vols/makarov_vols/
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - '8002:8000'
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.2
+    depends_on:
+      - db
+
+  web-rest-3:
+    build:
+      context: ./django-compose-reservations/makarov_reservations/
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - '8003:8000'
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.3
+    depends_on:
+      - db
+
+  web-rest-4:
+    build:
+      context: ./django-compose-structure/makarov_structure/
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - '8004:8000'
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.4
+    depends_on:
+      - db
+####################################
+
+##### NATS CLUSTER #####
+  nats:
+    image: nats
+    ports:
+      - "4222:4222"
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.10
+########################
+
+
+##### PYTHON MICROSERVICES #####
+  micro1:
+    build:
+      context: ./microservices-compose/
+      dockerfile: Dockerfile
+      target: micropy
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.20
+    command: python3 sub_annulation.py
+
+  micro2:
+    build:
+      context: ./microservices-compose/
+      dockerfile: microservices-compose/Dockerfile
+      target: micropy
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.21
+    command: python3 sub_bancaire.py
+
+  micro3:
+    build:
+      context: ./microservices-compose/
+      dockerfile: Dockerfile
+      target: micropy
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.22
+    command: python3 sub_dispo.py
+################################
+
+
+##### FRONT DJANGO ######
+  djangopache:
+    command: /usr/sbin/apache2ctl -D FOREGROUND
+    build:
+      context: ./djangopache-compose/
+      dockerfile: Dockerfile
+    ports:
+      - "81:80"
+      - "444:443"
+    networks:
+      my_network:
+        ipv4_address: 172.21.0.6
+#########################
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+volumes:
+  db-data:
+    name: "maria-data"
