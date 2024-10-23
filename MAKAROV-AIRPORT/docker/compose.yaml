@@ -97,7 +97,7 @@ services:
   micro2:
     build:
       context: ./microservices-compose/
-      dockerfile: microservices-compose/Dockerfile
+      dockerfile: Dockerfile
       target: micropy
     networks:
       my_network:
