@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml -o compose/
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
@@ -19,6 +19,7 @@ spec:
     metadata:
       annotations:
         kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml
+          -o compose/
         kompose.version: 1.21.0 (992df58d8)
       creationTimestamp: null
       labels:

@@ -1,0 +1,7 @@
+sudo echo "$(ip addr show | grep "eth0" | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p') k8sregistry" >> sudo /etc/hosts
+
+kubectl create secret docker-registry local-registry-secret \
+  --docker-server=controlplane:5000 \
+  --docker-username=vagrant \
+  --docker-password=vagrant \
+  --docker-email=vagrant@mail.com

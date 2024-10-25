@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd /vagrant/MAKAROV-AIRPORT/docker
 COMPOSE_DIR="compose"
 
 if [ ! -d "$COMPOSE_DIR" ]; then
