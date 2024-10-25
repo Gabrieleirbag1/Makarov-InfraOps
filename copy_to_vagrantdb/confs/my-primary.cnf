@@ -1,0 +1,8 @@
+[mysqld]
+server-id        = 1   # Unique ID for the primary server
+log-bin          = mysql-bin
+binlog-format    = ROW
+innodb_flush_log_at_trx_commit = 1
+sync_binlog      = 1
+skip-name-resolve = 1
+

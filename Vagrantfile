@@ -1,110 +1,136 @@
-
-require "yaml"
-vagrant_root = File.dirname(File.expand_path(__FILE__))
-settings = YAML.load_file "#{vagrant_root}/settings.yaml"
-
-IP_SECTIONS = settings["network"]["control_ip"].match(/^([0-9.]+\.)([^.]+)$/)
-# First 3 octets including the trailing dot:
-IP_NW = IP_SECTIONS.captures[0]
-# Last octet excluding all dots:
-IP_START = Integer(IP_SECTIONS.captures[1])
-NUM_WORKER_NODES = settings["nodes"]["workers"]["count"]
-
+# Vagrantfile for Debian with Docker installed
 Vagrant.configure("2") do |config|
-  config.vm.provision "shell", env: { "IP_NW" => IP_NW, "IP_START" => IP_START, "NUM_WORKER_NODES" => NUM_WORKER_NODES }, inline: <<-SHELL
-      apt-get update -y
-      echo "$IP_NW$((IP_START)) controlplane" >> /etc/hosts
-      for i in `seq 1 ${NUM_WORKER_NODES}`; do
-        echo "$IP_NW$((IP_START+i)) node0${i}" >> /etc/hosts
-      done
-  SHELL
+  #============================= ANSIBLE VM SECTION (TEMPORARY) ==============================
 
-  if `uname -m`.strip == "aarch64"
-    config.vm.box = settings["software"]["box"] + "-arm64"
-  else
-    config.vm.box = settings["software"]["box"]
-  end
-  config.vm.box_check_update = true
+  config.vm.define "vagrant_ansible" do |vagrant_ansible|
+    vagrant_ansible.vm.box = "ubuntu/focal64"
+    vagrant_ansible.vm.network "private_network", ip: "10.0.0.10"
 
-  config.vm.define "controlplane" do |controlplane|
-    controlplane.vm.hostname = "controlplane"
-    controlplane.vm.network "private_network", ip: settings["network"]["control_ip"]
-    if settings["shared_folders"]
-      settings["shared_folders"].each do |shared_folder|
-        controlplane.vm.synced_folder shared_folder["host_path"], shared_folder["vm_path"]
-      end
-    end
-    controlplane.vm.provider "virtualbox" do |vb|
-        vb.cpus = settings["nodes"]["control"]["cpu"]
-        vb.memory = settings["nodes"]["control"]["memory"]
-        if settings["cluster_name"] and settings["cluster_name"] != ""
-          vb.customize ["modifyvm", :id, "--groups", ("/" + settings["cluster_name"])]
-        end
-    end
-    controlplane.vm.provision "shell",
-      env: {
-        "DNS_SERVERS" => settings["network"]["dns_servers"].join(" "),
-        "ENVIRONMENT" => settings["environment"],
-        "KUBERNETES_VERSION" => settings["software"]["kubernetes"],
-        "KUBERNETES_VERSION_SHORT" => settings["software"]["kubernetes"][0..3],
-        "OS" => settings["software"]["os"]
-      },
-      path: "scripts/common.sh"
-    controlplane.vm.provision "shell",
-      env: {
-        "CALICO_VERSION" => settings["software"]["calico"],
-        "CONTROL_IP" => settings["network"]["control_ip"],
-        "POD_CIDR" => settings["network"]["pod_cidr"],
-        "SERVICE_CIDR" => settings["network"]["service_cidr"]
-      },
-      path: "scripts/master.sh"
-    controlplane.vm.provision "shell", path: "scripts/install_docker.sh"
-    controlplane.vm.provision "shell", path: "scripts/setup_registry.sh"
-    controlplane.vm.provision "shell", path: "scripts/build_images.sh"
-    controlplane.vm.provision "shell", path: "scripts/sshfix.sh"
-  end
-
-  (1..NUM_WORKER_NODES).each do |i|
-
-    config.vm.define "node0#{i}" do |node|
-      node.vm.hostname = "node0#{i}"
-      node.vm.network "private_network", ip: IP_NW + "#{IP_START + i}"
-      if settings["shared_folders"]
-        settings["shared_folders"].each do |shared_folder|
-          node.vm.synced_folder shared_folder["host_path"], shared_folder["vm_path"]
-        end
-      end
-      node.vm.provider "virtualbox" do |vb|
-          vb.cpus = settings["nodes"]["workers"]["cpu"]
-          vb.memory = settings["nodes"]["workers"]["memory"]
-          if settings["cluster_name"] and settings["cluster_name"] != ""
-            vb.customize ["modifyvm", :id, "--groups", ("/" + settings["cluster_name"])]
-          end
-      end
-      node.vm.provision "shell",
-        env: {
-          "DNS_SERVERS" => settings["network"]["dns_servers"].join(" "),
-          "ENVIRONMENT" => settings["environment"],
-          "KUBERNETES_VERSION" => settings["software"]["kubernetes"],
-          "KUBERNETES_VERSION_SHORT" => settings["software"]["kubernetes"][0..3],
-          "OS" => settings["software"]["os"]
-        },
-        path: "scripts/common.sh"
-      node.vm.provision "shell", path: "scripts/node.sh"
-      node.vm.provision "shell", path: "scripts/install_docker.sh"
-      node.vm.provision "shell",
-      inline: <<-SHELL
-        echo '{ "insecure-registries":["controlplane:5000"] }' | sudo tee /etc/docker/daemon.json
-        sudo systemctl restart docker
-      SHELL
-      node.vm.provision "shell", path: "scripts/pull_images.sh"
-      node.vm.provision "shell", path: "scripts/sshfix.sh"
-
-      # Only install the dashboard after provisioning the last worker (and when enabled).
-      if i == NUM_WORKER_NODES and settings["software"]["dashboard"] and settings["software"]["dashboard"] != ""
-        node.vm.provision "shell", path: "scripts/dashboard.sh"
-      end
+    vagrant_ansible.vm.provider "virtualbox" do |vb_ansible|
+      vb_ansible.name = "vagrant_ansible"
+      vb_ansible.memory = "4096"
     end
 
+    vagrant_ansible.vm.synced_folder "./fix_ssh_folder", "/home/vagrant/fix_ssh_folder"
+
+    vagrant_ansible.vm.provision "shell", inline: <<-SHELL
+      cd /home/vagrant/fix_ssh_folder
+      sudo chmod +x sshfix.sh
+      sudo bash sshfix.sh
+    SHELL
   end
-end 
+
+  #============================= DB VM SECTION ==============================
+
+  config.vm.define "vagrantdb" do |vagrantdb|
+    vagrantdb.vm.box = "ubuntu/focal64"
+    vagrantdb.vm.network "private_network", ip: "10.0.0.20"
+
+    #Set VM memory size (optional)
+    vagrantdb.vm.provider "virtualbox" do |vb|
+      vb.name = "vagrantdb"
+      vb.memory = "8192"
+    end
+
+    #Folder used for the db with configs and all..
+    vagrantdb.vm.synced_folder "./copy_to_vagrantdb", "/home/vagrant/copied_files"
+
+    #Folder used for the fixssh script
+    vagrantdb.vm.synced_folder "./fix_ssh_folder", "/home/vagrant/fix_ssh_folder"
+
+    vagrantdb.vm.provision "shell", inline: <<-SHELL
+      cd /home/vagrant/fix_ssh_folder
+      #sudo chmod +x sshfix.sh
+      sudo bash sshfix.sh
+      
+      cd /home/vagrant
+
+      # Update and install dependencies
+      sudo apt-get update
+      sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+
+      sudo apt-get install -y docker.io
+
+      # Add vagrant user to the docker group
+      sudo usermod -aG docker vagrant
+
+      # Enable and start Docker
+      sudo systemctl enable docker
+      sudo systemctl start docker
+      
+      mkdir -p /var/lib/mysql_primary
+      mkdir -p /var/lib/mysql_replica
+
+      sudo chmod -R 777 /var/lib/mysql_primary
+      sudo chmod -R 777 /var/lib/mysql_replica
+      
+      #Move to the correct location
+      cd /home/vagrant/copied_files
+      
+      echo "\n\n====================BUILDING PRIMARY DB IMAGE..====================\n\n"
+
+      #Build Primary-db image
+      docker build -t mariadb-primary -f /home/vagrant/copied_files/dockerfiles/Dockerfile-Primary-db .
+
+      echo "\n\n====================RUNNING PRIMARY DB CONTAINER...====================\n\n"
+
+      #Run the Primary-db container
+      docker run -d --restart unless-stopped \
+      --name mariadb-primary \
+      -p 3306:3306 \
+      -v /var/lib/mysql_primary:/var/lib/mysql \
+      mariadb-primary
+
+      echo "\n\n====================PRIMARY-DB CONTAINER DETAILS====================\n\n"
+      docker inspect mariadb-primary | grep IPAddress
+      
+      echo "\n\n====================GETTING PRIMARY DB LOG FILE NAME & POSITION...====================\n\n"
+      sleep 20
+      rm ./master-status.txt #Just in case it already exists.
+      docker exec -i mariadb-primary bash -c "mariadb -u root -ptoto -e 'SHOW MASTER STATUS'" > ./master-status.txt
+
+      # Extract log file and position from the master-status.txt
+      LOG_FILE=$(awk '/mysql-bin/ {print $1}' ./master-status.txt)
+      LOG_POS=$(awk '/mysql-bin/ {print $2}' ./master-status.txt)
+
+      echo "Log file: $LOG_FILE"
+      echo "Log position: $LOG_POS"
+
+      echo "\n\n====================CREATING INIT SQL FILE FOR REPLICA...====================\n\n"
+
+      # Dynamically create the init_replica.sql file
+cat > ./confs/init_replica.sql <<EOF
+STOP SLAVE;
+CHANGE MASTER TO
+    MASTER_HOST='172.17.0.2',
+    MASTER_USER='replicator',
+    MASTER_PASSWORD='toto',
+    MASTER_PORT=3306,
+    MASTER_CONNECT_RETRY=10,
+    MASTER_LOG_FILE='$LOG_FILE',
+    MASTER_LOG_POS=$LOG_POS;
+START SLAVE;
+EOF
+
+      echo "\n\n====================BUILDING REPLICA DB IMAGE..====================\n\n"
+
+      #Build Replica-db image
+      docker build -t mariadb-replica -f /home/vagrant/copied_files/dockerfiles/Dockerfile-Replica-db .
+
+      echo "\n\n====================RUNNING REPLICA DB CONTAINER...====================\n\n"
+
+      #Run the Replica-db container
+      docker run -d --restart unless-stopped \
+      --name mariadb-replica \
+      -v /var/lib/mysql_replica:/var/lib/mysql \
+      -p 3307:3306 \
+      mariadb-replica
+
+      echo "\n\n====================REPLICA-DB CONTAINER DETAILS====================\n\n"
+      docker inspect mariadb-replica | grep IPAddress
+
+      echo "\n\n====================DOCKER PS RESULT====================\n\n"
+      docker ps
+    SHELL
+  end
+end
