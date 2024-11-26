@@ -1,7 +1,7 @@
 sudo echo "$(ip addr show | grep "eth0" | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p') k8sregistry" >> sudo /etc/hosts
 
 kubectl create secret docker-registry local-registry-secret \
-  --docker-server=10.0.0.10:5000 \
+  --docker-server=192.168.56.10:5000 \
   --docker-username=vagrant \
   --docker-password=vagrant \
   --docker-email=vagrant@mail.com
@@ -18,7 +18,7 @@ kubectl create secret generic regcred \
 
 {
   "auths": {
-    "10.0.0.10:5000": {
+    "192.168.56.10:5000": {
       "auth": "dmFncmFudDp2YWdyYW50"
     }
   }
@@ -36,4 +36,4 @@ kubectl logs <pod-name>
 kubectl delete pods --all
 
 sudo nano /etc/default/kubelet
-KUBELET_EXTRA_ARGS="--insecure-registry=10.0.0.10:5000"
+KUBELET_EXTRA_ARGS="--insecure-registry=192.168.56.10:5000"
