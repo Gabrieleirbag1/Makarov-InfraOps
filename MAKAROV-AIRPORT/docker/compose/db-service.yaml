@@ -13,7 +13,9 @@ spec:
   - name: "3307"
     port: 3307
     targetPort: 3306
+    nodePort: 30007
   selector:
     io.kompose.service: db
+  type: NodePort
 status:
   loadBalancer: {}

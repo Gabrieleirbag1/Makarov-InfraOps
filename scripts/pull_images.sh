@@ -1,11 +1,11 @@
 #!/bin/bash
-sudo systemctl start docker
+systemctl start docker
 # Pull images
-sudo docker pull controlplane:5000/web-rest-1
-sudo docker pull controlplane:5000/web-rest-2
-sudo docker pull controlplane:5000/web-rest-3
-sudo docker pull controlplane:5000/web-rest-4
-sudo docker pull controlplane:5000/micro1
-sudo docker pull controlplane:5000/micro2
-sudo docker pull controlplane:5000/micro3
-sudo docker pull controlplane:5000/djangopache
+docker pull karimtufaistoujourslecon/web-rest-1
+docker pull karimtufaistoujourslecon/web-rest-2
+docker pull karimtufaistoujourslecon/web-rest-3
+docker pull karimtufaistoujourslecon/web-rest-4
+docker pull karimtufaistoujourslecon/micro1
+docker pull karimtufaistoujourslecon/micro2
+docker pull karimtufaistoujourslecon/micro3
+docker pull karimtufaistoujourslecon/djangopache

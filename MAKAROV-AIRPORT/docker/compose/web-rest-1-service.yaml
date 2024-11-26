@@ -10,10 +10,12 @@ metadata:
   name: web-rest-1
 spec:
   ports:
-  - name: "8001"
-    port: 8001
+  - protocol: TCP
+    port: 8000
     targetPort: 8000
+    nodePort: 30801
   selector:
     io.kompose.service: web-rest-1
+  type: NodePort
 status:
   loadBalancer: {}

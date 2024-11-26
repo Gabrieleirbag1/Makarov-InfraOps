@@ -22,4 +22,6 @@ sudo systemctl start docker
 
 sudo usermod -aG docker vagrant
 
+sudo chmod 666 /var/run/docker.sock
+
 sudo apt install -y docker-compose
