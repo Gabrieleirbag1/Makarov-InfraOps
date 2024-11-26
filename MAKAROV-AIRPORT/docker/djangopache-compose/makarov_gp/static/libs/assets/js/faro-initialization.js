@@ -11,5 +11,5 @@ initializeFaro({
     instrumentations: [
         ...getWebInstrumentations(),
         new TracingInstrumentation(),
-    ],
+    ],m
 });
