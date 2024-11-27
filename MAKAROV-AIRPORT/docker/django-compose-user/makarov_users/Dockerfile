@@ -18,16 +18,13 @@ WORKDIR /app
 
 COPY --from=builder /install /usr/local
 COPY . /app
-COPY ./wait-for-it.sh /wait-for-it.sh
 
 RUN python3 manage.py makemigrations \
-    && chmod +x /wait-for-it.sh \
-    && rm -f /etc/ssl/certs/ca-certificates.crt \
-    && rm -f /lib/apk/db/installed
+    && chmod +x /app/wait-for-it.sh
 
 
 # Commande d'entrée
 ENTRYPOINT ["sh", "-c"]
-CMD ["/wait-for-it.sh"]
+CMD ["/app/wait-for-it.sh"]
 
 
