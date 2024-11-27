@@ -1,7 +1,21 @@
 # syntax=docker/dockerfile:1.4
-# FROM --platform=$BUILDPLATFORM python:3.10-alpine AS micropy
-FROM python:3.10-alpine AS micropy
+
+# Étape 1 : Builder (construction des dépendances et compilations nécessaires)
+FROM python:3.10-alpine AS builder
 WORKDIR /app
+
 COPY ./requirements.txt /app
-RUN pip3 install -r requirements.txt --no-cache-dir
+
+RUN apk add --no-cache --virtual .build-deps \
+    gcc musl-dev libffi-dev openssl-dev \
+    && pip3 install --prefix=/install --no-cache-dir -r requirements.txt
+
+
+# Etape 2 : Build de l'image finale.
+FROM python:3.10-alpine
+WORKDIR /app
+
+COPY --from=builder /install /usr/local
 COPY . /app
+
+
