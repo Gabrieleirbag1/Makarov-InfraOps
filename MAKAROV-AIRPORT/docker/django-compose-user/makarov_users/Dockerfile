@@ -22,10 +22,7 @@ COPY ./wait-for-it.sh /wait-for-it.sh
 
 RUN python3 manage.py makemigrations \
     && chmod +x /wait-for-it.sh \
-    && rm -f /lib/libcrypto.so.3 \
-    && rm -f /lib/libssl.so.3 \
     && rm -f /etc/ssl/certs/ca-certificates.crt \
-    && rm -f /usr/lib/ossl-modules/legacy.so \
     && rm -f /lib/apk/db/installed
 
 
