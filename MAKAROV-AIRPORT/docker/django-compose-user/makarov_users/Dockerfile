@@ -12,19 +12,18 @@ RUN apk add --no-cache --virtual .build-deps \
 
 
 # Etape 2 : Build de l'image finale.
-
 FROM python:3.10-alpine
 WORKDIR /app
 
 COPY --from=builder /install /usr/local
 COPY . /app
+COPY ./wait-for-it.sh /wait-for-it.sh
 
 RUN python3 manage.py makemigrations \
-    && chmod +x /app/wait-for-it.sh
-
+    && chmod +x /wait-for-it.sh \
 
 # Commande d'entrée
 ENTRYPOINT ["sh", "-c"]
-CMD ["/app/wait-for-it.sh"]
+CMD ["/wait-for-it.sh"]
 
 
