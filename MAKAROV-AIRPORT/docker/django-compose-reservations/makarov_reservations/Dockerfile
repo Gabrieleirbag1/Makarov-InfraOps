@@ -20,7 +20,7 @@ COPY . /app
 COPY ./wait-for-it.sh /wait-for-it.sh
 
 RUN python3 manage.py makemigrations \
-    && chmod +x /wait-for-it.sh \
+    && chmod +x /wait-for-it.sh
 
 # Commande d'entrée
 ENTRYPOINT ["sh", "-c"]
