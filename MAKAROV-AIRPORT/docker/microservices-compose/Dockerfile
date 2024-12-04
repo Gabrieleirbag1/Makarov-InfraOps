@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 # Etape 1 Builder (construction des dépendances et compilations nécessaires)
 FROM python:3.10-alpine AS builder
 WORKDIR /app
