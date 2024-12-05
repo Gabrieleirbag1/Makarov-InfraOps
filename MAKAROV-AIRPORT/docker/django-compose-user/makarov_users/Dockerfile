@@ -21,6 +21,7 @@ COPY ./wait-for-it.sh /wait-for-it.sh
 
 RUN python3 manage.py makemigrations \
     && chmod +x /wait-for-it.sh
+    && rm /usr/lib/libssl.so.3 /lib/libcrypto.so.3
 
 # Commande d'entrée
 ENTRYPOINT ["sh", "-c"]
