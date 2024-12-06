@@ -75,14 +75,21 @@ WSGI_APPLICATION = 'makarov_users.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'makarov_airport',
+#         'USER': 'gab',
+#         'PASSWORD': 'toto',
+#         'HOST': 'db-service',
+#         'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'makarov_airport',
-        'USER': 'gab',
-        'PASSWORD': 'toto',
-        'HOST': '172.21.0.5',
-        'PORT': '3306',
     }
 }
 

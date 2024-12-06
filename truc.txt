@@ -26,14 +26,29 @@ kubectl create secret generic regcred \
 
 kubectl apply -f /vagrant/MAKAROV-AIRPORT/docker/compose/web-rest-1-deployment.yaml
 
+kubectl exec -it $(kubectl get pod -l app=curl-test -o jsonpath="{.items[0].metadata.name}") -- /bin/sh
+
 docker inspect --format='{{index .RepoDigests 0}}' <image-name>:<tag>
 
 kubectl describe pod <pod-name>
 kubectl get services
 kubectl get pods
 kubectl logs <pod-name>
+kubectl get pods -o wide
+
+kubectl describe nodes
+kubectl describe pod <pod-name>
+
+kubectl get pvc db-data
+kubectl get pv
 
 kubectl delete pods --all
 
 sudo nano /etc/default/kubelet
 KUBELET_EXTRA_ARGS="--insecure-registry=192.168.56.10:5000"
+
+db-service
+
+
+Version: '11.6.2-MariaDB-ubu2404'  socket: '/run/mysqld/mysqld.sock'  port: 3306  mariadb.org binary distribution
+2024-12-05 13:47:21 3 [Warning] Aborted connection 3 to db: 'unconnected' user: 'unauthenticated' host: '172.16.196.171' (This connection closed normally without authentication)

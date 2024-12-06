@@ -7,7 +7,6 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 COPY . /app
 COPY ./wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
-RUN python3 manage.py makemigrations
 ENTRYPOINT ["sh", "-c"]
-CMD ["/wait-for-it.sh"]
+CMD ["/wait-for-it.sh 8001"]
 

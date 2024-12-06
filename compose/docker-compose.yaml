@@ -15,6 +15,6 @@ services:
     ports:
       - "6379:6379"
     deploy:
-      replicas: 1
+      replicas: 3
       restart_policy:
         condition: on-failure

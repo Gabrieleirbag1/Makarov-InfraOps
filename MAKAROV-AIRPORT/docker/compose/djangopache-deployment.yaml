@@ -9,7 +9,7 @@ metadata:
     io.kompose.service: djangopache
   name: djangopache
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: djangopache
@@ -30,7 +30,7 @@ spec:
         - /usr/sbin/apache2ctl
         - -D
         - FOREGROUND
-        image: djangopache
+        image: karimtufaistoujourslecon/djangopache
         imagePullPolicy: ""
         name: djangopache
         ports:

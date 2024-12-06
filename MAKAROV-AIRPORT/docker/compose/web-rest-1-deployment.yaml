@@ -16,7 +16,9 @@ spec:
       - name: web-rest-1
         image: karimtufaistoujourslecon/web-rest-1:latest
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
         ports:
-        - containerPort: 8000
+        - containerPort: 8001
       imagePullSecrets:
       - name: local-registry-secret

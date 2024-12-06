@@ -1,19 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml -o compose/
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: web-rest-2
   name: web-rest-2
 spec:
+  type: NodePort
   ports:
-  - name: "8002"
+  - protocol: TCP
     port: 8002
-    targetPort: 8000
+    targetPort: 8002
+    nodePort: 30082
   selector:
-    io.kompose.service: web-rest-2
-status:
-  loadBalancer: {}
+    app: web-rest-2

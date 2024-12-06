@@ -93,6 +93,7 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", path: "scripts/install_docker.sh"
       #node.vm.provision "shell", path: "scripts/pull_images.sh"
       node.vm.provision "shell", path: "scripts/sshfix.sh"
+      node.vm.provision "shell", path: "scripts/install_db.sh"
 
       # Only install the dashboard after provisioning the last worker (and when enabled).
       if i == NUM_WORKER_NODES and settings["software"]["dashboard"] and settings["software"]["dashboard"] != ""

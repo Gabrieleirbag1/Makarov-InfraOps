@@ -46,13 +46,3 @@ docker tag karimtufaistoujourslecon/micro1 karimtufaistoujourslecon/micro1
 docker tag karimtufaistoujourslecon/micro2 karimtufaistoujourslecon/micro2
 docker tag karimtufaistoujourslecon/micro3 karimtufaistoujourslecon/micro3
 docker tag karimtufaistoujourslecon/djangopache karimtufaistoujourslecon/djangopache
-
-# Push images
-docker push karimtufaistoujourslecon/web-rest-1
-docker push karimtufaistoujourslecon/web-rest-2
-docker push karimtufaistoujourslecon/web-rest-3
-docker push karimtufaistoujourslecon/web-rest-4
-docker push karimtufaistoujourslecon/micro1
-docker push karimtufaistoujourslecon/micro2
-docker push karimtufaistoujourslecon/micro3
-docker push karimtufaistoujourslecon/djangopache
