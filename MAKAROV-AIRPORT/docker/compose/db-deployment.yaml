@@ -1,13 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml -o compose/
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
+  name: db
   labels:
     app: db
-  name: db
 spec:
   selector:
     matchLabels:
@@ -16,17 +12,13 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml
-          -o compose/
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
       labels:
-        io.kompose.network/my_network: "true"
         app: db
     spec:
       containers:
-      - env:
+      - name: db
+        image: mariadb
+        env:
         - name: MYSQL_DATABASE
           value: makarov_airport
         - name: MYSQL_PASSWORD
@@ -35,19 +27,12 @@ spec:
           value: toto
         - name: MYSQL_USER
           value: gab
-        image: mariadb
-        imagePullPolicy: ""
-        name: db
         ports:
         - containerPort: 3306
-        resources: {}
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: db-data
-      restartPolicy: Always
-      serviceAccountName: ""
       volumes:
       - name: db-data
         persistentVolumeClaim:
           claimName: db-data
-status: {}
