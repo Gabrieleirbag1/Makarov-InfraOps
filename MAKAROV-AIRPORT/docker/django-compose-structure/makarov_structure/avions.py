@@ -1,7 +1,7 @@
 import requests
 
 # Define the URL to your Django API endpoint for adding new Avions
-API_URL = "http://172.21.0.4:8004/structure/infos/avions/"
+API_URL = "http://web-rest-4:8004/structure/infos/avions/"
 
 # List of avion data to add
 avions_data = [

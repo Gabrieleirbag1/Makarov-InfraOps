@@ -74,7 +74,7 @@ class UserListApiView(APIView):
             username (str): nom d'utilisateur de l'utilisateur"""
         argent = random.randint(800, 3000)
         rib = random.randint(00000000, 99999999)
-        url = 'http://172.21.0.8:8001/users/infos/banque/'
+        url = 'http://web-rest-1:8001/users/infos/banque/'
         data = {
             'username': username,
             'argent': argent,
@@ -141,16 +141,16 @@ class UserDetailApiView(APIView):
         serializer = InfoUserSerializer(instance=user, data=data, partial=True)
 
         if serializer.is_valid():
-            response = requests.get(f"http://172.21.0.8:8001/users/infos/banque/?username={old_username}")
+            response = requests.get(f"http://web-rest-1:8001/users/infos/banque/?username={old_username}")
             id = response.json()[0]['id']
             try :
-                response = requests.get(f"http://172.21.0.4:8004/structure/infos/staff/?user_ref={old_username}")
+                response = requests.get(f"http://web-rest-4:8004/structure/infos/staff/?user_ref={old_username}")
                 id_staff = response.json()[0]['id']
             except IndexError:
                 id_staff = None
             try :
                 ids_res = []
-                response = requests.get(f"http://172.21.0.3:8003/reservations/infos/user_vols/?user_ref={old_username}")
+                response = requests.get(f"http://web-rest-3:8003/reservations/infos/user_vols/?user_ref={old_username}")
                 reservations = response.json()
                 for reservation in reservations:
                     ids_res.append(reservation['id'])
@@ -163,20 +163,20 @@ class UserDetailApiView(APIView):
             data = {
                 'username': request.data.get('username', user.username),
             }
-            response = requests.put(f"http://172.21.0.8:8001/users/infos/banque/{id}/", data=json.dumps(data), headers=headers)
+            response = requests.put(f"http://web-rest-1:8001/users/infos/banque/{id}/", data=json.dumps(data), headers=headers)
             
             if id_staff:
                 data = {
                     'user_ref': request.data.get('username', user.username),
                 }
-                response = requests.put(f"http://172.21.0.4:8004/structure/infos/staff/{id_staff}/", data=json.dumps(data), headers=headers)
+                response = requests.put(f"http://web-rest-4:8004/structure/infos/staff/{id_staff}/", data=json.dumps(data), headers=headers)
 
             if ids_res:
                 data = {
                     'user_ref': request.data.get('username', user.username),
                 }
                 for id_res in ids_res:
-                    response = requests.put(f"http://172.21.0.3:8003/reservations/infos/{id_res}/", data=json.dumps(data), headers=headers)
+                    response = requests.put(f"http://web-rest-3:8003/reservations/infos/{id_res}/", data=json.dumps(data), headers=headers)
 
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -256,7 +256,7 @@ class LoginUserListApiView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
-        infos = requests.get(f"http://172.21.0.8:8001/users/infos/users/?username={username}")
+        infos = requests.get(f"http://web-rest-1:8001/users/infos/users/?username={username}")
         infos = infos.json()
         try:
             if username == infos[0]['username'] and password == infos[0]['password']:
