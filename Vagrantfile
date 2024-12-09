@@ -62,6 +62,7 @@ Vagrant.configure("2") do |config|
     controlplane.vm.provision "shell", path: "scripts/build_images.sh"
     controlplane.vm.provision "shell", path: "scripts/sshfix.sh"
     controlplane.vm.provision "shell", path: "scripts/install_db.sh"
+    controlplane.vm.provision "shell", path: "scripts/bootstrap.sh"
   end
 
   (1..NUM_WORKER_NODES).each do |i|
@@ -95,6 +96,7 @@ Vagrant.configure("2") do |config|
       #node.vm.provision "shell", path: "scripts/pull_images.sh"
       node.vm.provision "shell", path: "scripts/sshfix.sh"
       node.vm.provision "shell", path: "scripts/install_db.sh"
+      node.vm.provision "shell", path: "scripts/bootstrap.sh"
 
       # Only install the dashboard after provisioning the last worker (and when enabled).
       if i == NUM_WORKER_NODES and settings["software"]["dashboard"] and settings["software"]["dashboard"] != ""
