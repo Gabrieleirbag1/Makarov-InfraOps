@@ -1,7 +1,54 @@
 sudo echo "$(ip addr show | grep "eth0" | sed -En 's/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p') k8sregistry" >> sudo /etc/hosts
 
 kubectl create secret docker-registry local-registry-secret \
-  --docker-server=controlplane:5000 \
+  --docker-server=192.168.56.10:5000 \
   --docker-username=vagrant \
   --docker-password=vagrant \
   --docker-email=vagrant@mail.com
+
+kubectl create secret docker-registry hub-registry \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=karimtufaistoujourslecon \
+  --docker-password=karimtufaistoujourslecon67 \
+  --docker-email=karimtufaistoujourslecon@gmail.com
+
+kubectl create secret generic regcred \
+  --from-file=.dockerconfigjson=/home/vagrant/.docker/config.json \
+  --type=kubernetes.io/dockerconfigjson
+
+{
+  "auths": {
+    "192.168.56.10:5000": {
+      "auth": "dmFncmFudDp2YWdyYW50"
+    }
+  }
+}
+
+kubectl apply -f /vagrant/MAKAROV-AIRPORT/docker/compose/web-rest-1-deployment.yaml
+
+kubectl exec -it $(kubectl get pod -l app=curl-test -o jsonpath="{.items[0].metadata.name}") -- /bin/sh
+
+docker inspect --format='{{index .RepoDigests 0}}' <image-name>:<tag>
+
+kubectl describe pod <pod-name>
+kubectl get services
+kubectl get pods
+kubectl logs <pod-name>
+kubectl get pods -o wide
+
+kubectl describe nodes
+kubectl describe pod <pod-name>
+
+kubectl get pvc db-data
+kubectl get pv
+
+kubectl delete pods --all
+
+sudo nano /etc/default/kubelet
+KUBELET_EXTRA_ARGS="--insecure-registry=192.168.56.10:5000"
+
+db-service
+
+
+Version: '11.6.2-MariaDB-ubu2404'  socket: '/run/mysqld/mysqld.sock'  port: 3306  mariadb.org binary distribution
+2024-12-05 13:47:21 3 [Warning] Aborted connection 3 to db: 'unconnected' user: 'unauthenticated' host: '172.16.196.171' (This connection closed normally without authentication)

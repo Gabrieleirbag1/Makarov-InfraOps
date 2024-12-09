@@ -1,38 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml -o compose/
-    kompose.version: 1.21.0 (992df58d8)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: web-rest-1
   name: web-rest-1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: web-rest-1
-  strategy: {}
+      app: web-rest-1
   template:
     metadata:
-      annotations:
-        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert -f kompose.yaml
-          -o compose/
-        kompose.version: 1.21.0 (992df58d8)
-      creationTimestamp: null
       labels:
-        io.kompose.network/my_network: "true"
-        io.kompose.service: web-rest-1
+        app: web-rest-1
     spec:
       containers:
-      - image: controlplane:5000/web-rest-1:latest
+      - name: web-rest-1
+        image: karimtufaistoujourslecon/web-rest-1:latest
         imagePullPolicy: IfNotPresent
-        name: web-rest-1
+        securityContext:
+          privileged: true
         ports:
-        - containerPort: 8000
-        resources: {}
-      restartPolicy: Always
-      serviceAccountName: ""
-      volumes: null
-status: {}
+        - containerPort: 8001
+      imagePullSecrets:
+      - name: local-registry-secret

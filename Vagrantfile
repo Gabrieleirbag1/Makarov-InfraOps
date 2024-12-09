@@ -59,9 +59,9 @@ Vagrant.configure("2") do |config|
       },
       path: "scripts/master.sh"
     controlplane.vm.provision "shell", path: "scripts/install_docker.sh"
-    controlplane.vm.provision "shell", path: "scripts/setup_registry.sh"
     controlplane.vm.provision "shell", path: "scripts/build_images.sh"
     controlplane.vm.provision "shell", path: "scripts/sshfix.sh"
+    controlplane.vm.provision "shell", path: "scripts/install_db.sh"
   end
 
   (1..NUM_WORKER_NODES).each do |i|
@@ -92,13 +92,9 @@ Vagrant.configure("2") do |config|
         path: "scripts/common.sh"
       node.vm.provision "shell", path: "scripts/node.sh"
       node.vm.provision "shell", path: "scripts/install_docker.sh"
-      node.vm.provision "shell",
-      inline: <<-SHELL
-        echo '{ "insecure-registries":["controlplane:5000"] }' | sudo tee /etc/docker/daemon.json
-        sudo systemctl restart docker
-      SHELL
-      node.vm.provision "shell", path: "scripts/pull_images.sh"
+      #node.vm.provision "shell", path: "scripts/pull_images.sh"
       node.vm.provision "shell", path: "scripts/sshfix.sh"
+      node.vm.provision "shell", path: "scripts/install_db.sh"
 
       # Only install the dashboard after provisioning the last worker (and when enabled).
       if i == NUM_WORKER_NODES and settings["software"]["dashboard"] and settings["software"]["dashboard"] != ""

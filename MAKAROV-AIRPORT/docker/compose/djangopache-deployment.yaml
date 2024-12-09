@@ -9,10 +9,10 @@ metadata:
     io.kompose.service: djangopache
   name: djangopache
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      io.kompose.service: djangopache
+      app: djangopache
   strategy: {}
   template:
     metadata:
@@ -23,14 +23,14 @@ spec:
       creationTimestamp: null
       labels:
         io.kompose.network/my_network: "true"
-        io.kompose.service: djangopache
+        app: djangopache
     spec:
       containers:
       - args:
         - /usr/sbin/apache2ctl
         - -D
         - FOREGROUND
-        image: djangopache
+        image: karimtufaistoujourslecon/djangopache
         imagePullPolicy: ""
         name: djangopache
         ports:

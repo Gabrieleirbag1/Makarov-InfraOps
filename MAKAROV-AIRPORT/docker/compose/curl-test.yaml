@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: curl-test
+  template:
+    metadata:
+      labels:
+        app: curl-test
+    spec:
+      containers:
+      - name: curl
+        image: curlimages/curl:latest
+        securityContext:
+          privileged: true
+        command: ["sleep", "infinity"]

@@ -18,12 +18,8 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY . /app
 COPY ./wait-for-it.sh /wait-for-it.sh
-
-RUN python3 manage.py makemigrations \
-    && chmod +x /wait-for-it.sh
-
-# Commande d'entrée
+RUN chmod +x /wait-for-it.sh
 ENTRYPOINT ["sh", "-c"]
-CMD ["/wait-for-it.sh"]
+CMD ["/wait-for-it.sh 8001"]
 
 

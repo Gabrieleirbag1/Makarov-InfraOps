@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': 'makarov_airport',
         'USER': 'gab',
         'PASSWORD': 'toto',
-        'HOST': '172.21.0.5',
+        'HOST': 'db-service',
         'PORT': '3306',
     }
 }

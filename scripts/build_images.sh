@@ -1,32 +1,50 @@
 #!/bin/bash
+sudo chmod 666 /var/run/docker.sock
+
+# Install Docker
 sudo systemctl start docker
+
+# Create Docker config.json with authentication details
+sudo mkdir -p /home/vagrant/.docker
+sudo bash -c 'cat <<EOF > /home/vagrant/.docker/config.json
+{
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "a2FyaW10dWZhaXN0b3Vqb3Vyc2xlY29uOmthcmltdHVmYWlzdG91am91cnNsZWNvbjY3"
+    }
+  }
+}
+EOF'
+
+# Login to Docker
+docker login
+
+# Make secret
+kubectl create secret docker-registry hub-registry \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=karimtufaistoujourslecon \
+  --docker-password=karimtufaistoujourslecon67 \
+  --docker-email=karimtufaistoujourslecon@gmail.com
+
 # Build images
 cd /vagrant/MAKAROV-AIRPORT/docker
-sudo docker build -t web-rest-1 django-compose-user/makarov_users/
-sudo docker build -t web-rest-2 django-compose-vols/makarov_vols/
-sudo docker build -t web-rest-3 django-compose-reservations/makarov_reservations/
-sudo docker build -t web-rest-4 django-compose-structure/makarov_structure/
-sudo docker build -t micro1 microservices-compose/
-sudo docker build -t micro2 microservices-compose/
-sudo docker build -t micro3 microservices-compose/
-sudo docker build -t djangopache djangopache-compose/
+docker build -t karimtufaistoujourslecon/web-rest-1 django-compose-user/makarov_users/
+docker build -t karimtufaistoujourslecon/web-rest-2 django-compose-vols/makarov_vols/
+docker build -t karimtufaistoujourslecon/web-rest-3 django-compose-reservations/makarov_reservations/
+docker build -t karimtufaistoujourslecon/web-rest-4 django-compose-structure/makarov_structure/
+docker build -t karimtufaistoujourslecon/micro1 microservices-compose/
+docker build -t karimtufaistoujourslecon/micro2 microservices-compose/
+docker build -t karimtufaistoujourslecon/micro3 microservices-compose/
+docker build -t karimtufaistoujourslecon/djangopache djangopache-compose/
+docker build -t karimtufaistoujourslecon/db-airport db-compose/
 
 # Tag images
-sudo docker tag web-rest-1 controlplane:5000/web-rest-1
-sudo docker tag web-rest-2 controlplane:5000/web-rest-2
-sudo docker tag web-rest-3 controlplane:5000/web-rest-3
-sudo docker tag web-rest-4 controlplane:5000/web-rest-4
-sudo docker tag micro1 controlplane:5000/micro1
-sudo docker tag micro2 controlplane:5000/micro2
-sudo docker tag micro3 controlplane:5000/micro3
-sudo docker tag djangopache controlplane:5000/djangopache
-
-# Push images
-sudo docker push controlplane:5000/web-rest-1
-sudo docker push controlplane:5000/web-rest-2
-sudo docker push controlplane:5000/web-rest-3
-sudo docker push controlplane:5000/web-rest-4
-sudo docker push controlplane:5000/micro1
-sudo docker push controlplane:5000/micro2
-sudo docker push controlplane:5000/micro3
-sudo docker push controlplane:5000/djangopache
+docker tag karimtufaistoujourslecon/web-rest-1 karimtufaistoujourslecon/web-rest-1
+docker tag karimtufaistoujourslecon/web-rest-2 karimtufaistoujourslecon/web-rest-2
+docker tag karimtufaistoujourslecon/web-rest-3 karimtufaistoujourslecon/web-rest-3
+docker tag karimtufaistoujourslecon/web-rest-4 karimtufaistoujourslecon/web-rest-4
+docker tag karimtufaistoujourslecon/micro1 karimtufaistoujourslecon/micro1
+docker tag karimtufaistoujourslecon/micro2 karimtufaistoujourslecon/micro2
+docker tag karimtufaistoujourslecon/micro3 karimtufaistoujourslecon/micro3
+docker tag karimtufaistoujourslecon/djangopache karimtufaistoujourslecon/djangopache
+docker tag karimtufaistoujourslecon/db-airport karimtufaistoujourslecon/db-airport 

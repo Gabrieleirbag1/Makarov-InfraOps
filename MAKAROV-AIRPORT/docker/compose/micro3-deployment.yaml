@@ -6,13 +6,13 @@ metadata:
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
-    io.kompose.service: micro3
+    app: micro3
   name: micro3
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: micro3
+      app: micro3
   strategy: {}
   template:
     metadata:
@@ -23,13 +23,13 @@ spec:
       creationTimestamp: null
       labels:
         io.kompose.network/my_network: "true"
-        io.kompose.service: micro3
+        app: micro3
     spec:
       containers:
       - args:
         - python3
         - sub_dispo.py
-        image: micro3
+        image: karimtufaistoujourslecon/micro3
         imagePullPolicy: ""
         name: micro3
         resources: {}
