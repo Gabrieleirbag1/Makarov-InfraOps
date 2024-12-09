@@ -17,22 +17,6 @@ spec:
     spec:
       containers:
       - name: db
-        image: mariadb
-        env:
-        - name: MYSQL_DATABASE
-          value: makarov_airport
-        - name: MYSQL_PASSWORD
-          value: toto
-        - name: MYSQL_ROOT_PASSWORD
-          value: toto
-        - name: MYSQL_USER
-          value: gab
+        image: karimtufaistoujourslecon/db-airport
         ports:
         - containerPort: 3306
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: db-data
-      volumes:
-      - name: db-data
-        persistentVolumeClaim:
-          claimName: db-data

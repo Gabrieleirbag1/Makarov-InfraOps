@@ -9,3 +9,4 @@ docker pull karimtufaistoujourslecon/micro1
 docker pull karimtufaistoujourslecon/micro2
 docker pull karimtufaistoujourslecon/micro3
 docker pull karimtufaistoujourslecon/djangopache
+docker pull karimtufaistoujourslecon/db-airport

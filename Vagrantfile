@@ -61,6 +61,7 @@ Vagrant.configure("2") do |config|
     controlplane.vm.provision "shell", path: "scripts/install_docker.sh"
     controlplane.vm.provision "shell", path: "scripts/build_images.sh"
     controlplane.vm.provision "shell", path: "scripts/sshfix.sh"
+    controlplane.vm.provision "shell", path: "scripts/install_db.sh"
   end
 
   (1..NUM_WORKER_NODES).each do |i|

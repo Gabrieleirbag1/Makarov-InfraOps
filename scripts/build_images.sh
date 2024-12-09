@@ -36,6 +36,7 @@ docker build -t karimtufaistoujourslecon/micro1 microservices-compose/
 docker build -t karimtufaistoujourslecon/micro2 microservices-compose/
 docker build -t karimtufaistoujourslecon/micro3 microservices-compose/
 docker build -t karimtufaistoujourslecon/djangopache djangopache-compose/
+docker build -t karimtufaistoujourslecon/db-airport db-compose/
 
 # Tag images
 docker tag karimtufaistoujourslecon/web-rest-1 karimtufaistoujourslecon/web-rest-1
@@ -46,3 +47,4 @@ docker tag karimtufaistoujourslecon/micro1 karimtufaistoujourslecon/micro1
 docker tag karimtufaistoujourslecon/micro2 karimtufaistoujourslecon/micro2
 docker tag karimtufaistoujourslecon/micro3 karimtufaistoujourslecon/micro3
 docker tag karimtufaistoujourslecon/djangopache karimtufaistoujourslecon/djangopache
+docker tag karimtufaistoujourslecon/db-airport karimtufaistoujourslecon/db-airport 
