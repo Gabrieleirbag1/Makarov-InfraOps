@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: db-a
+  name: db-b
   labels:
-    app: db-a
+    app: db-b
 spec:
   selector:
     matchLabels:
-      app: db-a
+      app: db-b
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: db-a
+        app: db-b
     spec:
       containers:
-      - name: db-a
-        image: karimtufaistoujourslecon/db-master-a
+      - name: db-b
+        image: karimtufaistoujourslecon/db-master-b
         ports:
-        - containerPort: 3306
+        - containerPort: 3307
         volumeMounts:
         - mountPath: /var/lib/mysql
-          name: db-a-data
+          name: db-b-data
       volumes:
-      - name: db-a-data
+      - name: db-b-data
         persistentVolumeClaim:
-          claimName: db-a-pvc
+          claimName: db-b-pvc
