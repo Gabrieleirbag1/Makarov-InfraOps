@@ -33,5 +33,3 @@ services:
     network_mode: host
     labels:
       org.label-schema.group: "monitoring"
-  
-

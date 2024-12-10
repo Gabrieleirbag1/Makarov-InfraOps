@@ -1,6 +1,7 @@
 #!/bin/bash
 cd /vagrant/MAKAROV-AIRPORT/docker
 COMPOSE_DIR="compose"
+GRAFANA_DIR="grafana-kubernetes"
 
 if [ ! -d "$COMPOSE_DIR" ]; then
   echo "Directory $COMPOSE_DIR does not exist."
@@ -15,5 +16,3 @@ for file in "$COMPOSE_DIR"/*.yaml; do
     echo "No YAML files found in $COMPOSE_DIR."
   fi
 done
-
-echo "All files applied."
