@@ -9,7 +9,7 @@ metadata:
     io.kompose.service: djangopache
   name: djangopache
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: djangopache
