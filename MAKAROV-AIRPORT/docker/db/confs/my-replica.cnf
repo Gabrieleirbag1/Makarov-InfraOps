@@ -1,0 +1,8 @@
+[mysqld]
+server-id        = 2   # Unique ID for the Master B server
+log-bin          = mysql-bin
+relay-log        = mysql-relay-bin
+binlog-format    = ROW
+innodb_flush_log_at_trx_commit = 1
+sync_binlog      = 1
+skip-name-resolve = 1

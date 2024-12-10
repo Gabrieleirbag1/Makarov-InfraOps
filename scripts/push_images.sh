@@ -10,4 +10,6 @@ docker push karimtufaistoujourslecon/micro1
 docker push karimtufaistoujourslecon/micro2
 docker push karimtufaistoujourslecon/micro3
 docker push karimtufaistoujourslecon/djangopache
-docker push karimtufaistoujourslecon/db-airport
+# docker push karimtufaistoujourslecon/db-airport
+docker push karimtufaistoujourslecon/db-master-a
+docker push karimtufaistoujourslecon/db-master-b

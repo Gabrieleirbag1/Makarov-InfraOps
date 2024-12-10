@@ -1,0 +1,20 @@
+# Replica MariaDB Dockerfile
+
+FROM mariadb:latest
+
+# Set environment variables for MariaDB root user password and server ID
+ENV MYSQL_ROOT_PASSWORD=toto
+ENV MARIADB_SERVER_ID=2
+ENV MARIADB_DATABASE=makarov_airport
+
+# Copy custom MariaDB configuration file for replica server
+COPY confs/my-replica.cnf /etc/mysql/my.cnf
+
+# Copy the SQL file to create the replication user
+COPY confs/init_masters.sql /docker-entrypoint-initdb.d/init_masters.sql
+
+# Make the bash script executable
+RUN apt update && apt install -y systemd
+
+# Expose default MariaDB port
+EXPOSE 3306

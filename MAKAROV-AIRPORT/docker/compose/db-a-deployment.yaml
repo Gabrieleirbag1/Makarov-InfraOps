@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-a
+  labels:
+    app: db-a
+spec:
+  selector:
+    matchLabels:
+      app: db-a
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: db-a
+    spec:
+      containers:
+      - name: db-a
+        image: mariadb
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: db-a-data
+      volumes:
+      - name: db-a-data
+        persistentVolumeClaim:
+          claimName: db-a-pvc
