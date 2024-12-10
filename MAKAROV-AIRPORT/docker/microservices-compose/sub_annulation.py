@@ -2,8 +2,9 @@ import asyncio
 import nats
 import json
 import os
+import time
 import requests
-import threading
+from concurrent.futures import ThreadPoolExecutor
 
 class SubscriberAnnulation():
     def __init__(self, subject, type_) -> None:
@@ -12,7 +13,7 @@ class SubscriberAnnulation():
         self.type_ = type_
         
     def setup(self):
-        return asyncio.run(self.run_subscriber())
+        asyncio.run(self.run_subscriber())
 
     async def message_handler(self, msg):
         if msg.subject == f"annulation.{self.subject}":
@@ -70,6 +71,11 @@ class SubscriberAnnulation():
         finally:
             await self.nc.close()
 
+def main():
+    time.sleep(50)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(SubscriberAnnulation("demande", "demande").setup)
+        executor.submit(SubscriberAnnulation("validation", "annulation").setup)
+
 if __name__ == '__main__':
-    threading.Thread(target=SubscriberAnnulation("demande", "demande").setup).start()
-    threading.Thread(target=SubscriberAnnulation("validation", "annulation").setup).start()
+    main()

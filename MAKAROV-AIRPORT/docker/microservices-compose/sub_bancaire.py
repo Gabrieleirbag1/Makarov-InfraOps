@@ -2,6 +2,7 @@ import asyncio
 import nats
 import json
 import os
+import time
 import requests
 
 async def message_handler(msg):
@@ -102,5 +103,6 @@ async def run_subscriber():
         await nc.close()
 
 if __name__ == '__main__':
+    time.sleep(50)
     path = os.path.join(os.path.dirname(__file__), 'hotline.json')
     asyncio.run(run_subscriber())

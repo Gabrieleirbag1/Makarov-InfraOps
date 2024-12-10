@@ -2,6 +2,7 @@ import asyncio
 import nats
 import json
 import os
+import time
 import requests
 import threading
 
@@ -65,7 +66,7 @@ class SubscriberDispo():
                 'demande': 'False',
                 'annulation': 'False'
             }
-            response = requests.post(f"web-rest-3:8003/reservations/infos/",
+            response = requests.post(f"http://web-rest-3:8003/reservations/infos/",
                                     data=json.dumps(data),
                                     headers={'Content-Type': 'application/json'})
             print(response.json()["user_ref"])
@@ -90,4 +91,5 @@ class SubscriberDispo():
             await self.nc.close()
 
 if __name__ == '__main__':
+    time.sleep(50)
     ui = SubscriberDispo().setup()
