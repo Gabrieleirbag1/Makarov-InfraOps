@@ -20,7 +20,7 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 
 echo "Installing Grafana using Helm..."
-helm upgrade monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace -f "$GRAFANA_DIR/values.yaml"
+helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace -f "$GRAFANA_DIR/values.yaml"
 
 
 echo "Listening port 3000"
