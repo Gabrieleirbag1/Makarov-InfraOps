@@ -10,6 +10,8 @@ IP_NW = IP_SECTIONS.captures[0]
 IP_START = Integer(IP_SECTIONS.captures[1])
 NUM_WORKER_NODES = settings["nodes"]["workers"]["count"]
 
+$default_network_interface = `ip route | awk '/^default/ {printf "%s", $5; exit 0}'`
+
 Vagrant.configure("2") do |config|
   config.vm.provision "shell", env: { "IP_NW" => IP_NW, "IP_START" => IP_START, "NUM_WORKER_NODES" => NUM_WORKER_NODES }, inline: <<-SHELL
       apt-get update -y
@@ -28,7 +30,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "controlplane" do |controlplane|
     controlplane.vm.hostname = "controlplane"
-    controlplane.vm.network "public_network", ip: settings["network"]["control_ip"]
+    controlplane.vm.network "public_network", ip: settings["network"]["control_ip"], bridge: $default_network_interface
     controlplane.vm.network "forwarded_port", guest: 3000, host: 3030
     if settings["shared_folders"]
       settings["shared_folders"].each do |shared_folder|
@@ -69,7 +71,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.define "node0#{i}" do |node|
       node.vm.hostname = "node0#{i}"
-      node.vm.network "public_network", ip: IP_NW + "#{IP_START + i}"
+      node.vm.network "public_network", ip: IP_NW + "#{IP_START + i}", bridge: "#$default_network_interface"
       node.vm.network "forwarded_port", guest: 30080, host: 8080
       if settings["shared_folders"]
         settings["shared_folders"].each do |shared_folder|
