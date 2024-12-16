@@ -41,11 +41,6 @@ install_on_debian() {
     echo "Installation de Vagrant..."
     sudo apt-get install -y vagrant
 
-    # Installer Grafana
-    echo "Installation de Grafana..."
-    sudo apt-get install -y software-properties-common
-    sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
-    sudo apt-get install -y grafana
 
     echo "Toutes les installations sont terminées sur Debian."
 }
