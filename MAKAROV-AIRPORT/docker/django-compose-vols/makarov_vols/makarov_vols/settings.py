@@ -81,11 +81,20 @@ DATABASES = {
         'NAME': 'makarov_airport',
         'USER': 'gab',
         'PASSWORD': 'toto',
+        'HOST': 'db-a-service',
+        'PORT': '3306',
+    },
+    'db_b': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'makarov_airport',
+        'USER': 'gab',
+        'PASSWORD': 'toto',
         'HOST': 'db-b-service',
         'PORT': '3306',
     }
 }
 
+DATABASE_ROUTERS = ['vols.routers.DatabaseRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

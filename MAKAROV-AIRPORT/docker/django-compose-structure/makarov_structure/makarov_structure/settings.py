@@ -83,8 +83,18 @@ DATABASES = {
         'PASSWORD': 'toto',
         'HOST': 'db-a-service',
         'PORT': '3306',
+    },
+    'db_b': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'makarov_airport',
+        'USER': 'gab',
+        'PASSWORD': 'toto',
+        'HOST': 'db-b-service',
+        'PORT': '3306',
     }
 }
+
+DATABASE_ROUTERS = ['structure.routers.DatabaseRouter']
 
 
 # Password validation

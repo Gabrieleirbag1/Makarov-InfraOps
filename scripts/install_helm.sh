@@ -24,4 +24,4 @@ helm install monitoring prometheus-community/kube-prometheus-stack --namespace m
 
 
 echo "Listening port 3000"
-kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring --address 192.168.56.10 > /dev/null 2>&1 &
+kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring --address 0.0.0.0 > /dev/null 2>&1 &
