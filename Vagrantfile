@@ -10,7 +10,7 @@ IP_NW = IP_SECTIONS.captures[0]
 IP_START = Integer(IP_SECTIONS.captures[1])
 NUM_WORKER_NODES = settings["nodes"]["workers"]["count"]
 
-$default_network_interface = `ip route | awk '/^default/ {printf "%s", $5; exit 0}'`
+$default_network_interface = `./select_network.sh`.strip
 
 Vagrant.configure("2") do |config|
   config.vm.provision "shell", env: { "IP_NW" => IP_NW, "IP_START" => IP_START, "NUM_WORKER_NODES" => NUM_WORKER_NODES }, inline: <<-SHELL
