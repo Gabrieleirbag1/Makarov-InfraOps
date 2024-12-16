@@ -1,6 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    role: web-rest
   name: web-rest-2
 spec:
   replicas: 1

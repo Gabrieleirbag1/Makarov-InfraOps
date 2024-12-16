@@ -4,6 +4,7 @@ metadata:
   name: db-a
   labels:
     app: db-a
+    role: db
 spec:
   selector:
     matchLabels:

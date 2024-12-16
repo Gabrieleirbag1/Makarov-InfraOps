@@ -1,0 +1,105 @@
+---
+# NetworkPolicy pour db permettant la communication avec web-rest
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-to-web-rest
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: web-rest
+---
+# NetworkPolicy pour djangopache permettant la communication avec nats et web-rest
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-djangopache-to-nats-and-web-rest
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: djangopache
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nats
+    - podSelector:
+        matchLabels:
+          app: web-rest
+---
+# NetworkPolicy pour micro permettant la communication avec api et nats
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-micro-to-api-and-nats
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: micro
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api
+    - podSelector:
+        matchLabels:
+          app: nats
+---
+# NetworkPolicy pour nats permettant la communication avec micro et djangopache
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nats-to-micro-and-djangopache
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: nats
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: micro
+    - podSelector:
+        matchLabels:
+          app: djangopache
+---
+# NetworkPolicy pour web-rest permettant la communication avec bdd, micro et djangopache
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-rest-to-bdd-micro-and-djangopache
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: web-rest
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: bdd
+    - podSelector:
+        matchLabels:
+          app: micro
+    - podSelector:
+        matchLabels:
+          app: djangopache

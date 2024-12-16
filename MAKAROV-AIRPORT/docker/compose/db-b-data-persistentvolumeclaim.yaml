@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  labels:
+    role: db
   name: db-b-pvc
 spec:
   accessModes:
