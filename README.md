@@ -20,11 +20,9 @@ echo "* 0.0.0.0/0 ::/0" | sudo tee -a /etc/vbox/networks.conf</pre>
 
 Cela permet aux réseaux uniquement hôtes d'être dans n'importe quelle plage, et pas seulement `192.168.56.0/21` comme décrit ici sur la [doc](https://discuss.hashicorp.com/t/vagrant-2-2-18-osx-11-6-cannot-create-private-network/30984/23).
 
-Installation des dépendances
-Pour installer les dépendances nécessaires, exécutez le script install.bash :
-
 ## 🚀 Lancement du projet 
-Pour démarrer le projet, exécutez le script start.sh :
+Pour démarrer le projet, exécutez le script `start.sh` :
+<pre>./start.sh</pre>
 
 Une fois l'installation terminée, le site web sera disponible à l'adresse suivante : 
 [http://<votre_ip>:8080/home/](http://<votre_ip>:8080/home/)
@@ -44,7 +42,5 @@ Les contributions sont les bienvenues ! Veuillez soumettre une pull request ou o
 - **Mahé Fradin** - [Github](https://github.com/Wewenito)
 - **Owen Pichot** - [Github](https://github.com/ROCKS-IT)
 - **Pierre Bourger** - [Github](https://github.com/ROCKS-IT)
-
-
 
 Merci d'utiliser MAKAROV-AIRPORT ! ✈️
