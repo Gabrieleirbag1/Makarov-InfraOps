@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "node0#{i}" do |node|
       node.vm.hostname = "node0#{i}"
       node.vm.network "public_network", ip: IP_NW + "#{IP_START + i}", bridge: "#$default_network_interface"
-      node.vm.network "forwarded_port", guest: 30080, host: 8080
+      node.vm.network "forwarded_port", guest: 30080, host: 8079 + i 
       if settings["shared_folders"]
         settings["shared_folders"].each do |shared_folder|
           node.vm.synced_folder shared_folder["host_path"], shared_folder["vm_path"]

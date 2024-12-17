@@ -1,0 +1,112 @@
+---
+- name: Handle the database's data
+  hosts: db
+  gather_facts: false
+  tasks:
+    - name: Getting current date & time
+      delegate_to: localhost
+      shell: date "+%d_%m_%Y-%H_%M"
+      register: datetime #Variable then accessible from the playbook as {{ datetime.stdout }}
+      changed_when: false #Prevents the task from being displayed as 'changed' instead of 'ok'
+      tags:
+        - A
+        - B
+
+    - name: Displaying the current date & time
+      debug:
+        msg: "It is currently {{ datetime.stdout }}"
+      tags:
+        - A
+        - B
+
+    - name: Determine container to save from based on tag
+      set_fact:
+        container: "{{ 'db-a' if 'A' in ansible_run_tags else 'db-b' }}"
+      tags:
+        - A
+        - B
+
+    - name: Display the container to save from
+      debug:
+        msg: "Saving from container: {{ container }}"
+      tags:
+        - A
+        - B
+
+    - name: Get the pod name for service {{ container }}
+      command: kubectl get pods -n default -l app={{ container }} -o name
+      register: pod_raw
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Extract pod name and remove prefix
+      set_fact:
+        pod_name: "{{ pod_raw.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw.stdout == ""
+      tags:
+        - A
+        - B
+
+    - name: Verify the pod name
+      debug:
+        msg: "Pod name is: {{ pod_name }}"
+      tags:
+        - A
+        - B
+
+    - name: Save an instance of the mariadb database
+      shell: kubectl exec {{ pod_name }} -- bash -c "mariadb-dump -u root -ptoto makarov_airport > /tmp/backup_{{ datetime.stdout }}.sql"
+      register: backup_status
+      changed_when: false
+      tags:
+        - A
+        - B
+    
+    - name: Display the backup status
+      debug:
+        msg: "Backup status: {{ 'OK' if backup_status.rc == 0 else 'ERROR' }}"
+      tags:
+        - A
+        - B
+
+    - name: Copying the backup to the host
+      shell: kubectl cp {{ pod_name }}:/tmp/backup_{{ datetime.stdout }}.sql /tmp/backup_{{ datetime.stdout }}.sql
+      register: copy_status
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Display the copy status
+      debug:
+        msg: "Copy status: {{ 'OK' if copy_status.rc == 0 else 'ERROR' }}"
+      tags:
+        - A
+        - B
+
+    - name: Copy the backup to the host
+      ansible.builtin.fetch:
+        src: "/tmp/backup_{{ datetime.stdout }}.sql"
+        dest: "./backups/"
+        flat: yes
+      register: copy_status
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Remove the temporary file from the pod
+      shell: kubectl exec {{ pod_name }} -- rm /tmp/backup_{{ datetime.stdout }}.sql
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Removing temporary file from the host
+      shell: rm /tmp/backup_{{ datetime.stdout }}.sql
+      changed_when: false
+      tags:
+        - A
+        - B

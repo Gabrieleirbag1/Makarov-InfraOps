@@ -1,0 +1,164 @@
+---
+- name: Initialize the master / master relation of the database.
+  hosts: db
+  become: yes
+  gather_facts: false
+
+  vars:
+    master_user_both: "replicator"
+    master_password_both: "toto"
+    master_port_both: 3306
+
+  tasks:
+    - name: (Master A) Get Pod Name
+      shell: kubectl get pods -n default -l app=db-a -o name
+      register: pod_raw_a
+      changed_when: false
+
+    - name: (Master A) Set sanitized pod name
+      set_fact:
+        pod_name_a: "{{ pod_raw_a.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw_a.stdout == ""
+
+    - name: (Master B) Get Pod Name
+      shell: kubectl get pods -n default -l app=db-b -o name
+      register: pod_raw_b
+      changed_when: false
+
+    - name: (Master B) Set sanitized pod name
+      set_fact:
+        pod_name_b: "{{ pod_raw_b.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw_b.stdout == ""
+
+    - name: (Master A) Get IP Address
+      shell: kubectl get service db-a-service -o jsonpath='{.spec.clusterIP}'
+      register: master_a_ip
+      changed_when: false
+
+    - name: Set sanitized DB-A IP
+      set_fact:
+        sanitized_master_a_ip: "{{ master_a_ip.stdout | regex_replace('\\n', '') | trim }}"
+
+    - name: (Master B) Get IP Address
+      shell: kubectl get service db-b-service -o jsonpath='{.spec.clusterIP}'
+      register: master_b_ip
+      changed_when: false
+
+    - name: Set sanitized DB-B IP
+      set_fact:
+        sanitized_master_b_ip: "{{ master_b_ip.stdout | regex_replace('\\n', '') | trim }}"
+
+    - name: (Master A & B) Delete any pre-existing master-status file
+      shell: >
+        kubectl exec {{ pod_name_a }} -- rm -f /tmp/master-status.txt
+        kubectl exec {{ pod_name_b }} -- rm -f /tmp/master-status.txt
+      ignore_errors: yes
+      changed_when: false
+
+    - name: (Master A) Getting the master status
+      shell: kubectl exec {{ pod_name_a }} -- bash -c "mariadb -u root -ptoto -e 'SHOW MASTER STATUS;' > /tmp/master-status.txt"
+      register: master_status_a
+      changed_when: false
+
+    - name: (Master B) Getting the master status
+      shell: kubectl exec {{ pod_name_b }} -- bash -c "mariadb -u root -ptoto -e 'SHOW MASTER STATUS;' > /tmp/master-status.txt"
+      register: master_status_b
+      changed_when: false
+
+    - name: (Master A) Extract log file variable
+      shell: kubectl exec {{ pod_name_a }} -- bash -c "cut -f1 /tmp/master-status.txt | grep 'mysql-bin' | tr -d '\t\r\n'"
+      register: log_file_a
+      changed_when: false
+
+    - name: (Master A) Extract log position variable
+      shell: kubectl exec {{ pod_name_a }} -- bash -c "cut -f2 /tmp/master-status.txt | grep '^[0-9]' | tr -d '\t\r\n'"
+      register: log_pos_a
+      changed_when: false
+
+    - name: (Master B) Extract log file variable
+      shell: kubectl exec {{ pod_name_b }} -- bash -c "cut -f1 /tmp/master-status.txt | grep 'mysql-bin' | tr -d '\t\r\n'"
+      register: log_file_b
+      changed_when: false
+
+    - name: (Master B) Extract log position variable
+      shell: kubectl exec {{ pod_name_b }} -- bash -c "cut -f2 /tmp/master-status.txt | grep '^[0-9]' | tr -d '\t\r\n'"
+      register: log_pos_b
+      changed_when: false
+
+    - name: (Master A & B) Display Master informations
+      debug:
+        msg:
+          - "Pod Name DB A : {{ pod_name_a }}"
+          - "IP Address A: {{ sanitized_master_a_ip }}"
+          - "Log file A: {{ log_file_a.stdout }}"
+          - "Log position A: {{ log_pos_a.stdout }}"
+          - "Pod Name DB B : {{ pod_name_b }}"
+          - "IP Address B: {{ sanitized_master_b_ip }}"
+          - "Log file B: {{ log_file_b.stdout }}"
+          - "Log position B: {{ log_pos_b.stdout }}"
+
+    - name: Resuming in 10 seconds
+      pause:
+        seconds: 10
+
+    - name: (Master A) Configure the database for replication
+      shell: >
+        kubectl exec {{ pod_name_a }} -- bash -c "
+        mariadb -u root -ptoto -e \"
+        STOP SLAVE;
+        CHANGE MASTER TO
+          MASTER_HOST='{{ sanitized_master_b_ip }}',
+          MASTER_USER='{{ master_user_both }}',
+          MASTER_PASSWORD='{{ master_password_both }}',
+          MASTER_PORT={{ master_port_both }},
+          MASTER_CONNECT_RETRY=10,
+          MASTER_LOG_FILE='{{ log_file_b.stdout }}',
+          MASTER_LOG_POS={{ log_pos_b.stdout }};
+        START SLAVE;\"
+        "
+      register: configure_master_a
+      changed_when: false
+
+    - name: (Master B) Configure the database for replication
+      shell: >
+        kubectl exec {{ pod_name_b }} -- bash -c "
+        mariadb -u root -ptoto -e \"
+        STOP SLAVE;
+        CHANGE MASTER TO
+          MASTER_HOST='{{ sanitized_master_a_ip }}',
+          MASTER_USER='{{ master_user_both }}',
+          MASTER_PASSWORD='{{ master_password_both }}',
+          MASTER_PORT={{ master_port_both }},
+          MASTER_CONNECT_RETRY=10,
+          MASTER_LOG_FILE='{{ log_file_a.stdout }}',
+          MASTER_LOG_POS={{ log_pos_a.stdout }};
+        START SLAVE;\"
+        "
+      register: configure_master_b
+      changed_when: false
+
+    - name: (Master A) Set auto-increment offset
+      shell: kubectl exec {{ pod_name_a }} -- bash -c "mariadb -u root -ptoto -e 'SET GLOBAL auto_increment_increment=2; SET GLOBAL auto_increment_offset=1;'"
+      register: set_auto_increment_offset_a
+      changed_when: false
+
+    - name: (Master B) Set auto-increment offset
+      shell: kubectl exec {{ pod_name_b }} -- bash -c "mariadb -u root -ptoto -e 'SET GLOBAL auto_increment_increment=2; SET GLOBAL auto_increment_offset=2;'"
+      register: set_auto_increment_offset_b
+      changed_when: false
+
+    - name: (Master A) Verify slave status
+      shell: kubectl exec {{ pod_name_a }} -- bash -c "mariadb -u root -ptoto -e 'SHOW SLAVE STATUS\G'"
+      register: slave_status_a
+      changed_when: false
+
+    - name: (Master B) Verify slave status
+      shell: kubectl exec {{ pod_name_b }} -- bash -c "mariadb -u root -ptoto -e 'SHOW SLAVE STATUS\G'"
+      register: slave_status_b
+      changed_when: false
+
+    - name: (Master A & B) Display slave statuses
+      debug:
+        var: slave_status_a.stdout_lines
+    - debug:
+        var: slave_status_b.stdout_lines

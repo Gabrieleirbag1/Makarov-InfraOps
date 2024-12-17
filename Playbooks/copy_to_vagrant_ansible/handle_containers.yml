@@ -1,0 +1,35 @@
+---
+- name: Handle the containers' statuses
+  hosts: db
+  gather_facts: false
+  tasks:
+
+    - name: Determine container to save from based on tag
+      set_fact:
+        container: "{{ 'db-a' if 'A' in ansible_run_tags else 'db-b' }}"
+      tags:
+        - A
+        - B
+
+    - name: Start Primary container
+      shell: kubectl scale deployment {{ container }} --replicas=1
+      register: primary_status
+      changed_when: false
+      tags:
+        - start
+
+    - name: Stop pod
+      shell: kubectl scale deployment {{ container }} --replicas=0
+      register: primary_status
+      changed_when: false
+      tags:
+        - stop
+
+    - name: Restart Primary container
+      shell: kubectl rollout restart deployment {{ container }}
+      register: primary_status
+      changed_when: false
+      tags:
+        - restart
+
+- import_playbook: check_containers.yml

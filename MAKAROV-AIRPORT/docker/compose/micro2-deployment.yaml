@@ -9,7 +9,7 @@ metadata:
     app: micro2
   name: micro2
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: micro2

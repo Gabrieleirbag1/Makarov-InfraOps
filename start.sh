@@ -12,10 +12,10 @@ vagrant ssh controlplane -c "cd /vagrant/scripts && ./apply_all.sh"
 
 echo -e "${BLUE_CYAN_BOLD}Waiting for Grafana to start...${RESET}"
 vagrant ssh controlplane -c "cd /vagrant/scripts && ./install_helm.sh"
-vagrant ssh controlplane -c "cd /vagrant/scripts/ && ./run_grafana.sh"
 
 echo -e "${BLUE_CYAN_BOLD}Waiting for all pods to be ready...${RESET}"
 sleep 60
+vagrant ssh controlplane -c "cd /vagrant/scripts/ && ./run_grafana.sh"
 
 default_interface=$(./select_network.sh)
 

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: web-rest-1
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: web-rest-1

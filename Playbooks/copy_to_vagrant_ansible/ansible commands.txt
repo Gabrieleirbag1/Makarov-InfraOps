@@ -1,0 +1,86 @@
+##########################################################################################
+##############################  COMMANDES GENERALES  #####################################
+##########################################################################################
+
+## Tester la connection avec les hosts du fichier hosts.ini
+
+-> ansible -i hosts.ini vagrantdb -m ping
+
+## Execution d'un playbook
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook>
+
+## Executer un playbook avec un tag
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook> --tags tag1
+
+## Executer un playbook avec de multiples tags
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook> --tags "tag1,tag2,tag3"
+
+
+##########################################################################################
+######################  PLAYBOOKS DISPONIBLES & UTILISATION  #############################
+##########################################################################################
+
+# CHECK CONTAINERS (check_containers.yml) ##
+
+## Description : Check the status of one or both database containers (are they running or not ?).
+
+## Uses :
+    - ansible-playbook -i hosts.ini check_containers.yml (Do the check for both containers)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags primary (Check only the primary container)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags replica (Check only the replica container)
+
+
+# CHECK MARIADB (check_mariadb.yml) ##
+
+## Description : Check the status of one or both mariadb services hosted on the containers.
+
+## Uses :
+    - ansible-playbook -i hosts.ini check_mariadb.yml (Do the check for both mariadb services)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags primary (Check only the primary mariadb service)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags replica (Check only the replica mariadb service)
+
+
+# DB INIT (db_init.yml) ##
+
+## Description : Permet la mise en place du système Master / Master sur les bdds
+
+## Uses : 
+    - ansible-playbook -i hosts.ini db_init.yml
+
+
+# DB SAVE (db_save.yml) ##
+
+## Description : Permet de realiser une save de la BDD (soit depuis Master A ou B) et l'enregistrer sur la vm hôte du conteneur
+
+## Uses : 
+    - [Save la BDD du Master A] ansible-playbook -i hosts.ini db_save.yml 
+    - [Save la BDD du Master B] ansible-playbook -i hosts.ini db_save.yml --tags B
+    - [Save la BDD du Master A] ansible-playbook -i hosts.ini db_save.yml --tags A
+
+
+# DB RESTORE (db_restore.yml) ##
+
+## Description : Permet de restorer une save de BDD sur l'un des conteneurs de BDD (l'utilisateur sera prompté pour la selection du fichier)
+
+## Uses : 
+    - [Restaurer la save sur le Master A] ansible-playbook -i hosts.ini db_restore.yml
+    - [Restaurer la save sur le Master A] ansible-playbook -i hosts.ini db_restore.yml --tags A
+    - [Restaurer la save sur le Master B] ansible-playbook -i hosts.ini db_restore.yml --tags B
+
+
+# HANDLE CONTAINERS (handle_containers.yml) ##
+
+## Description : Permet de stopper, démarrer ou redémarrer un ou deux des conteneurs de BDD.
+
+## Uses : 
+    - [Demarrer 2 conteneurs sans status] ansible-playbook -i hosts.ini handle_containers.yml --tags start
+    - [Demarrer 2 conteneurs avec status] ansible-playbook -i hosts.ini handle_containers.yml --tags "start,primary,replica"
+    - [Demarrer 1 seul conteneur] ansible-playbook -i hosts.ini handle_containers.yml --tags "start,replica"
+    - [Stopper 2 conteneurs avec status] ansible-playbook -i hosts.ini handle_containers.yml --tags "stop,primary,replica"
+    - [Stopper 1 seul conteneur] ansible-playbook -i hosts.ini handle_containers.yml --tags "stop,primary"
+    - [Redemarrer 2 conteneurs sans status] ansible-playbook -i hosts.ini handle_containers.yml --tags restart
+    - [Redemarrer 1 seul conteneur] ansible-playbook -i hosts.ini handle_containers.yml --tags "restart,replica"
+

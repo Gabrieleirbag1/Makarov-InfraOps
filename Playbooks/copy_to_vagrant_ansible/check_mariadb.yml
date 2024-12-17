@@ -1,0 +1,56 @@
+---
+- name: Check the DB statuses
+  hosts: db
+  gather_facts: false
+  tasks:
+    - name: Determine container to save from based on tag
+      set_fact:
+        container: "{{ 'db-a' if 'A' in ansible_run_tags else 'db-b' }}"
+      tags:
+        - A
+        - B
+
+    - name: Display the container to save from
+      debug:
+        msg: "Saving from container: {{ container }}"
+      tags:
+        - A
+        - B
+
+    - name: Get the pod name for service {{ container }}
+      command: kubectl get pods -n default -l app={{ container }} -o name
+      register: pod_raw
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Extract pod name and remove prefix
+      set_fact:
+        pod_name: "{{ pod_raw.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw.stdout == ""
+      tags:
+        - A
+        - B
+
+    - name: Verify the pod name
+      debug:
+        msg: "Pod name is: {{ pod_name }}"
+      tags:
+        - A
+        - B
+
+    - name: Check if MariaDB server is running
+      shell: kubectl exec {{ pod_name }} -- bash -c "mariadb-admin -u root -ptoto ping"
+      register: status
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Display database status
+      debug:
+        msg: "Mariadb status for {{ container }} : {{ 'OK' if status.stdout == 'mysqld is alive' else 'ERROR' }}"
+      tags:
+        - A
+        - B
