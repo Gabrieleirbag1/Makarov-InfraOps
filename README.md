@@ -39,4 +39,12 @@ Une fois l'installation terminée, le site web sera disponible à l'adresse suiv
 ## 🤝 Contribution 
 Les contributions sont les bienvenues ! Veuillez soumettre une pull request ou ouvrir une issue pour toute suggestion ou amélioration.
 
+## ✍️ Auteurs
+- **Gabriel Garrone** - [Github](https://github.com/Gabrieleirbag1)
+- **Mahé Fradin** - [Github](https://github.com/Wewenito)
+- **Owen Pichot** - [Github](https://github.com/ROCKS-IT)
+- **Pierre Bourger** - [Github](https://github.com/ROCKS-IT)
+
+
+
 Merci d'utiliser MAKAROV-AIRPORT ! ✈️
