@@ -20,3 +20,7 @@ helm repo update
 
 echo "Installing Grafana using Helm..."
 helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace -f "$GRAFANA_DIR/values.yaml"
+if [ $? -ne 0 ]; then
+  echo "Installation failed. Trying upgrade instead..."
+  helm upgrade monitoring prometheus-community/kube-prometheus-stack --namespace monitoring -f "$GRAFANA_DIR/values.yaml"
+fi
