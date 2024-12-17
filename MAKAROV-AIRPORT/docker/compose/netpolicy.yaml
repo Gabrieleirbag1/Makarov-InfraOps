@@ -1,105 +1,105 @@
----
-# NetworkPolicy pour db permettant la communication avec web-rest
+# Bloquer db -> djangopache, micro
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-db-to-web-rest
+  name: block-db
   namespace: default
 spec:
   podSelector:
     matchLabels:
       app: db
   policyTypes:
-  - Ingress
-  ingress:
-  - from:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: web-rest
+          app: djangopache
+    - podSelector:
+        matchLabels:
+          app: micro
+
 ---
-# NetworkPolicy pour djangopache permettant la communication avec nats et web-rest
+# Bloquer djangopache -> db, micro
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-djangopache-to-nats-and-web-rest
+  name: block-djangopache
   namespace: default
 spec:
   podSelector:
     matchLabels:
       app: djangopache
   policyTypes:
-  - Ingress
-  ingress:
-  - from:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: nats
+          app: db
     - podSelector:
         matchLabels:
-          app: web-rest
+          app: micro
+
 ---
-# NetworkPolicy pour micro permettant la communication avec api et nats
+# Bloquer micro -> db, djangopache
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-micro-to-api-and-nats
+  name: block-micro
   namespace: default
 spec:
   podSelector:
     matchLabels:
       app: micro
   policyTypes:
-  - Ingress
-  ingress:
-  - from:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: api
+          app: db
     - podSelector:
         matchLabels:
-          app: nats
+          app: djangopache
+
 ---
-# NetworkPolicy pour nats permettant la communication avec micro et djangopache
+# Bloquer nats -> db, web-rest
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-nats-to-micro-and-djangopache
+  name: block-nats
   namespace: default
 spec:
   podSelector:
     matchLabels:
       app: nats
   policyTypes:
-  - Ingress
-  ingress:
-  - from:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: micro
+          app: db
     - podSelector:
         matchLabels:
-          app: djangopache
+          app: web-rest
+
 ---
-# NetworkPolicy pour web-rest permettant la communication avec bdd, micro et djangopache
+# Bloquer web-rest -> nats
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-web-rest-to-bdd-micro-and-djangopache
+  name: block-web-rest
   namespace: default
 spec:
   podSelector:
     matchLabels:
       app: web-rest
   policyTypes:
-  - Ingress
-  ingress:
-  - from:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: bdd
-    - podSelector:
-        matchLabels:
-          app: micro
-    - podSelector:
-        matchLabels:
-          app: djangopache
+          app: nats
