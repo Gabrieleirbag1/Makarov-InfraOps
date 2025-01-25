@@ -1,0 +1,36 @@
+- name: Retrieve the pod name for service
+  hosts: db
+  gather_facts: no
+  tasks:
+    - name: Set service label for "db-a"
+      set_fact:
+        service_label: "db-a"
+      tags: A
+
+    - name: Set service label for "db-b"
+      set_fact:
+        service_label: "db-b"
+      tags: B
+
+    - name: Get the pod name for the selected service
+      command: kubectl get pods -n default -l app={{ service_label }} -o name
+      register: pod_raw
+      failed_when: service_label is not defined
+      tags:
+        - A
+        - B
+
+    - name: Extract pod name and remove prefix
+      set_fact:
+        pod_name: "{{ pod_raw.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw.stdout == ""
+      tags:
+        - A
+        - B
+
+    - name: Verify the pod name
+      debug:
+        msg: "Pod name is: {{ pod_name }}"
+      tags:
+        - A
+        - B

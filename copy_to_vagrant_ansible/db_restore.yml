@@ -1,0 +1,169 @@
+---
+- name: Restoring a DB save to a container
+  hosts: db
+  gather_facts: false
+  vars_prompt:
+    - name: file_to_copy
+      prompt: "Enter the full path of the file to copy from vagrant_ansible (folder /backups/)"
+      private: no
+
+  tasks:
+    - name: Check if the file exists on this machine
+      delegate_to: localhost
+      ansible.builtin.stat:
+        path: "{{ file_to_copy }}"
+      register: file_status
+      tags:
+        - A
+        - B
+
+    - name: Abort if the file doesn't exist
+      fail:
+        msg: "The file {{ file_to_copy }} does not exist on vagrant_ansible!"
+      when: not file_status.stat.exists
+      tags:
+        - A
+        - B
+
+    - name: Determine container to save from based on tag
+      set_fact:
+        container: "{{ 'db-a' if 'A' in ansible_run_tags else 'db-b' }}"
+      tags:
+        - A
+        - B
+
+    - name: Display the container to save from
+      debug:
+        msg: "Saving from container: {{ container }}"
+      tags:
+        - A
+        - B
+
+    - name: Get the pod name for service {{ container }}
+      command: kubectl get pods -n default -l app={{ container }} -o name
+      register: pod_raw
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Extract pod name and remove prefix
+      set_fact:
+        pod_name: "{{ pod_raw.stdout | regex_replace('^pod/', '') }}"
+      failed_when: pod_raw.stdout == ""
+      tags:
+        - A
+        - B
+
+    - name: Verify the pod name
+      debug:
+        msg: "Pod name is: {{ pod_name }}"
+      tags:
+        - A
+        - B
+
+    - name: Copy the file from vagrant_ansible to containers host
+      ansible.builtin.copy:
+        src: "{{ file_to_copy }}"
+        dest: "/tmp/{{ file_to_copy | basename }}"
+      changed_when: false
+      register: copy_to_vm_status
+      tags:
+        - A
+        - B
+
+    - name: Abort if the file copy to the host failed
+      fail:
+        msg: "Failed to copy {{ file_to_copy | basename }} to vagrantdb."
+      when: copy_to_vm_status is failed
+      tags:
+        - A
+        - B
+
+    - name: Verify the file was copied successfully on the host
+      ansible.builtin.shell: ls /tmp/{{ file_to_copy | basename }}
+      register: verify_copy
+      failed_when: verify_copy.rc != 0
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Display file verification
+      debug:
+        msg: "File {{ file_to_copy | basename }} copied to /tmp/ on the host."
+      tags:
+        - A
+        - B
+
+    - name: Copy the file from the host to the container
+      shell: kubectl cp /tmp/{{ file_to_copy | basename }} {{ pod_name }}:/tmp/{{ file_to_copy | basename }}
+      register: docker_copy_status
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Abort if the file could not be copied into the container
+      fail:
+        msg: "Failed to copy {{ file_to_copy | basename }} into the container."
+      when: docker_copy_status.rc != 0
+      tags:
+        - A
+        - B
+
+    - name: Confirm the file is in the container
+      shell: kubectl exec {{ pod_name }} -- ls /tmp/
+      register: verify_file
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Check if the file exists inside the container
+      set_fact:
+        file_in_container: "{{ file_to_copy | basename in verify_file.stdout }}"
+      tags:
+        - A
+        - B
+
+    - name: Display file verification result
+      debug:
+        msg: >
+          {% if file_in_container %}
+            SUCCESS: File {{ file_to_copy | basename }} is present inside the container.
+          {% else %}
+            FAILURE: File {{ file_to_copy | basename }} was NOT found inside the container.
+          {% endif %}
+      tags:
+        - A
+        - B
+
+    - name: Restoring the database
+      shell: kubectl exec {{ pod_name }} -- bash -c "mariadb -u root -ptoto makarov_airport < /tmp/{{ file_to_copy | basename }}"
+      register: db_restore_status
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Display the database restoration status
+      debug:
+        msg: "Database restoration status: {{ 'OK' if db_restore_status.rc == 0 else 'ERROR' }}"
+      tags:
+        - A
+        - B
+
+    - name: Remove the temporary file from the container
+      shell: kubectl exec {{ pod_name }} -- rm /tmp/{{ file_to_copy | basename }}
+      changed_when: false
+      tags:
+        - A
+        - B
+
+    - name: Removing the temporary file from vagrantdb
+      shell: rm /tmp/{{ file_to_copy | basename }}
+      changed_when: false
+      tags:
+        - A
+        - B

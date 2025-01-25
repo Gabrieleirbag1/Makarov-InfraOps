@@ -1,0 +1,35 @@
+---
+- name: Check the DB pod statuses
+  hosts: db
+  gather_facts: false
+  tasks:
+    - name: Check if the DB-A service is running
+      shell: kubectl get service db-a-service -o jsonpath='{.spec.clusterIP}'
+      register: service_status
+      changed_when: false
+      tags:
+        - A
+        - all
+
+    - name: Display sanitized DB-A service status
+      debug:
+        msg: "Database A is running, IP: {{ service_status.stdout | regex_replace('\\n', '') | trim }}"
+      tags:
+        - A
+        - all
+
+    - name: Check if the DB-B service is running
+      shell: kubectl get service db-b-service -o jsonpath='{.spec.clusterIP}'
+      register: service_status_b
+      changed_when: false
+      tags:
+        - B
+        - all
+
+    - name: Display sanitized DB-B service status
+      debug:
+        msg: "Database B is running, IP: {{ service_status_b.stdout | regex_replace('\\n', '') | trim }}"
+      tags:
+        - B
+        - all
+

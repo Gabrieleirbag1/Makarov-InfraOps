@@ -1,0 +1,81 @@
+##########################################################################################
+##############################  COMMANDES GENERALES  #####################################
+##########################################################################################
+
+## Tester la connection avec les hosts du fichier hosts.ini
+
+-> ansible -i hosts.ini vagrantdb -m ping
+
+## Execution d'un playbook
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook>
+
+## Executer un playbook avec un tag
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook> --tags tag1
+
+## Executer un playbook avec de multiples tags
+
+-> ansible-playbook -i <fichier_hosts> <fichier_playbook> --tags "tag1,tag2,tag3"
+
+
+##########################################################################################
+######################  PLAYBOOKS DISPONIBLES & UTILISATION  #############################
+##########################################################################################
+
+# CHECK CONTAINERS (check_containers.yml) ## 
+
+## Description : Check the status of one or both database containers (are they running or not ?).
+
+## Uses :
+    - ansible-playbook -i hosts.ini check_containers.yml (Do the check for both containers)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags A (Check only the master A container)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags B (Check only the master B container)
+
+
+# CHECK MARIADB (check_mariadb.yml) ##
+
+## Description : Check the status of a mariadb services hosted on one of the pods.
+
+## Uses :
+    - ansible-playbook -i hosts.ini check_containers.yml --tags A (Check Master A)
+    - ansible-playbook -i hosts.ini check_containers.yml --tags B (Check Master B)
+
+
+# DB INIT (db_init.yml) ##
+
+## Description : Permet la mise en place du système Master / Master sur les bdds
+
+## Uses : 
+    - ansible-playbook -i hosts.ini db_init.yml
+
+
+# DB SAVE (db_save.yml) ##
+
+## Description : Permet de realiser une save de la BDD (soit depuis Master A ou B) et l'enregistrer sur la vm hôte du conteneur
+
+## Uses : 
+    - [Save la BDD du Master A] ansible-playbook -i hosts.ini db_save.yml 
+    - [Save la BDD du Master B] ansible-playbook -i hosts.ini db_save.yml --tags B
+    - [Save la BDD du Master A] ansible-playbook -i hosts.ini db_save.yml --tags A
+
+
+# DB RESTORE (db_restore.yml) ##
+
+## Description : Permet de restorer une save de BDD sur l'un des conteneurs de BDD (l'utilisateur sera prompté pour la selection du fichier)
+
+## Uses : 
+    - [Restaurer la save sur le Master A] ansible-playbook -i hosts.ini db_restore.yml
+    - [Restaurer la save sur le Master A] ansible-playbook -i hosts.ini db_restore.yml --tags A
+    - [Restaurer la save sur le Master B] ansible-playbook -i hosts.ini db_restore.yml --tags B
+
+
+# HANDLE CONTAINERS (handle_containers.yml) ##
+
+## Description : Permet de stopper, démarrer ou redémarrer un ou deux des conteneurs de BDD.
+
+## Uses : 
+    - [Demarrer le master A] ansible-playbook -i hosts.ini handle_containers.yml --tags "start,A"
+    - [Redémarrer le master B] ansible-playbook -i hosts.ini handle_containers.yml --tags "restart,B"
+    - [Stopper le master A] ansible-playbook -i hosts.ini handle_containers.yml --tags "A,stop"
+
